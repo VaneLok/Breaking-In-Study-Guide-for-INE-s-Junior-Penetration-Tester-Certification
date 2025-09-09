@@ -269,10 +269,12 @@ This helps identify hosts, subdomains, mail servers, and other infrastructure li
 **Example command:**  
 ```bash
 wafw00f https://example.com
+```  
 
 ---
 
-### 📚 Key Takeaways
+### 📚 Key Takeaways  
 - wafw00f is a **low-impact detection step** to run before active scans.  
 - Knowing the WAF and its behavior helps **adapt tooling and payloads**.  
 - Combine wafw00f results with **DNS/WHOIS and tech fingerprinting** for a fuller profile.  
+
