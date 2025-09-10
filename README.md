@@ -277,4 +277,80 @@ wafw00f https://example.com
 - wafw00f is a **low-impact detection step** to run before active scans.  
 - Knowing the WAF and its behavior helps **adapt tooling and payloads**.  
 - Combine wafw00f results with **DNS/WHOIS and tech fingerprinting** for a fuller profile.  
+ 
+
+## Lesson 7: Subdomain Enumeration With Sublist3r  
+
+### 📌 What is Sublist3r?  
+**Sublist3r** is a Python tool designed to enumerate subdomains of websites using **OSINT techniques**.  
+It helps penetration testers and bug bounty hunters collect and gather subdomains for their target domain.  
+
+Sublist3r works by querying multiple search engines and services to discover subdomains, and can also perform brute-force subdomain enumeration via the integrated **subbrute** module.  
+
+---
+
+### 🔑 Why it Matters  
+- Identifies hidden or forgotten subdomains  
+- Maps a larger attack surface of the target organization  
+- Helps correlate infrastructure across different hosts  
+- Provides reconnaissance data for further active scanning  
+
+---
+
+### 🛠️ What Information Are We Looking For?  
+- Subdomains linked to the target domain  
+- Services tied to those subdomains (web apps, mail, APIs, staging environments)  
+- Possible entry points that aren’t exposed via the main website  
+
+---
+
+### 📦 About Sublist3r  
+- Written in **Python**  
+- Uses OSINT sources such as:  
+  - Google, Yahoo, Bing, Baidu, Ask  
+  - Netcraft, VirusTotal, ThreatCrowd, DNSdumpster, ReverseDNS  
+- Integrated with **subbrute** to increase coverage through brute-force enumeration  
+- Brute-force uses an improved wordlist by *TheRook* (author of subbrute)  
+
+---
+
+### 📊 Usage Options  
+
+| Short Form | Long Form      | Description                                              |  
+|------------|---------------|----------------------------------------------------------|  
+| -d         | --domain      | Domain name to enumerate subdomains of                   |  
+| -b         | --bruteforce  | Enable the subbrute brute-force module                   |  
+| -p         | --ports       | Scan the found subdomains against specific TCP ports     |  
+| -v         | --verbose     | Enable verbose mode and display results in real-time     |  
+| -t         | --threads     | Number of threads to use for subbrute brute-force        |  
+| -e         | --engines     | Specify a comma-separated list of search engines         |  
+| -o         | --output      | Save the results to a text file                          |  
+| -h         | --help        | Show the help message and exit                           |  
+
+---
+
+### ▶️ Example Commands  
+
+Run Sublist3r against a domain:  
+```bash
+sublist3r -d example.com
+```  
+
+Save results to a text file:  
+```bash
+sublist3r -d example.com -o subdomains.txt
+```  
+
+Enable brute-force with subbrute:  
+```bash
+sublist3r -d example.com -b -t 50
+```  
+
+---
+
+### 📚 Key Takeaways  
+- Sublist3r is a **passive + brute-force hybrid tool** for subdomain enumeration.  
+- It leverages **search engines and OSINT sources** for wide coverage.  
+- With the **subbrute module**, it can brute-force subdomains using wordlists.  
+- Always review discovered subdomains for **hidden services** that may expose vulnerabilities.  
 
