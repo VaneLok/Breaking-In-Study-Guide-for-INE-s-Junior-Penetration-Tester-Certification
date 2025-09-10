@@ -4,6 +4,8 @@ A focused **study guide** designed to prepare you for INE’s Junior Penetration
 
 # eJPT Study Guide  
 
+## Passive Information Gathering
+
 ## Lesson 1: Information Gathering  
 
 ### 📌 What is Information Gathering?  
@@ -353,4 +355,81 @@ sublist3r -d example.com -b -t 50
 - It leverages **search engines and OSINT sources** for wide coverage.  
 - With the **subbrute module**, it can brute-force subdomains using wordlists.  
 - Always review discovered subdomains for **hidden services** that may expose vulnerabilities.  
+
+
+## Lesson 8: Google Dorks  
+
+### 📌 What is Google Dorking?  
+**Google Dorking** (also known as *Google-fu* or *Google hacking*) is the use of advanced search operators in Google to discover information that is not easily visible through normal browsing.  
+It is a form of **passive reconnaissance** that leverages publicly available data indexed by search engines.  
+
+---
+
+### 🔑 Why it Matters  
+- Helps uncover **sensitive information** accidentally exposed online  
+- Can reveal configuration files, login portals, and credentials  
+- Identifies hidden directories, forgotten files, or indexed backups  
+- Complements other OSINT methods with quick results  
+
+---
+
+### 🛠️ Google Dorks Cheat Sheet  
+
+| Operator        | Description                                | Example Usage                                |  
+|-----------------|--------------------------------------------|----------------------------------------------|  
+| `site:`         | Restrict search to a specific domain        | `site:*.domainexample.com`                   |  
+| `inurl:`        | Search for keywords in the URL path        | `inurl:admin`                                |  
+| `filetype:`     | Find specific file types                   | `filetype:pdf site:*.domainexample.com`      |  
+| `intitle:`      | Look for keywords in the page title        | `intitle:"index of"`                         |  
+| `cache:`        | View cached version of a site              | `cache:domainexample.com`                    |  
+| `" "` (quotes)  | Match exact phrase                        | `"confidential report"`                      |  
+
+---
+
+### ▶️ Example Commands  
+
+Search for admin pages:  
+```bash
+site:*.domainexample.com inurl:admin
+```  
+
+Search for PDF files on a domain:  
+```bash
+site:*.domainexample.com filetype:pdf
+```  
+
+Look for exposed authentication files:  
+```bash
+inurl:auth_users_file.txt
+```  
+
+Look for exposed password files:  
+```bash
+inurl:password.txt
+```  
+
+Search for open directory listings:  
+```bash
+intitle:"index of"
+```  
+
+View cached pages from Google:  
+```bash
+cache:domainexample.com
+```  
+
+---
+
+### 🧰 Additional Resources  
+- **Wayback Machine (archive.org)** → Explore historical versions of websites  
+- **Google Hacking Database (GHDB)** → Curated collection of powerful Google dorks  
+
+---
+
+### 📚 Key Takeaways  
+- Google Dorking is a **powerful passive recon technique**.  
+- Use operators like `site:`, `inurl:`, `filetype:`, `intitle:` to refine results.  
+- Quotation marks `" "` force exact matches in searches.  
+- Combine Google Dorks with tools like the **Wayback Machine** and **GHDB** for deeper recon.  
+
 
