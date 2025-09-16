@@ -572,8 +572,7 @@ theHarvester can pull results from multiple OSINT providers, including:
 - Supports a wide range of data sources, from **search engines to security services**.  
 - Great for **reconnaissance before phishing campaigns** or credential testing.  
 - Always secure API keys (e.g., Shodan, Virustotal, Hunter.io) before running advanced modules.  
-
-# eJPT Study Guide  
+ 
 
 ## Lesson 10: Leaked Password Databases  
 
@@ -625,6 +624,9 @@ curl -H "hibp-api-key: YOUR_API_KEY" \
 - Tools like **Have I Been Pwned** allow passive recon on user accounts.  
 - APIs (HIBP, DeHashed, LeakCheck) can integrate into **automation workflows**.  
 - Monitoring leaks helps defenders **enforce resets** and reduce credential reuse risks.  
+
+
+# eJPT Study Guide 
 
 ## Active Information Gathering 
 
