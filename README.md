@@ -848,3 +848,409 @@ nmap -sV -T4 target.com
 - Combine flags (`-sV`, `-O`, `-sC`) for **deep reconnaissance**.  
 - Timing templates (`-T0`–`-T5`) let you balance **speed vs stealth**.  
 - Fragmentation (`-f`) may bypass weak firewalls/IDS, but is noisy in modern environments.  
+
+
+# eJPT Study Guide 
+
+## Networking Primer
+
+## Lesson 1: Networking Fundamentals  
+
+### 📌 What is Networking?  
+Networking is the practice of connecting computers and devices so they can communicate and share resources.  
+The **primary goal of networking** is to exchange information between systems — this exchange happens through **packets** and **protocols**.
+
+---
+
+### 📦 Packets  
+Packets are the fundamental units of communication over a network.
+
+- **Structure:** Every packet has two main parts:  
+  - **Header** → protocol-specific metadata (addresses, flags, lengths, sequencing) that lets the receiver interpret and route the payload.  
+  - **Payload** → the actual content being carried (e.g., part of an email, HTTP response body, file chunk).
+
+- **Notes:**  
+  - Packets are streams of bits transmitted as electrical/optical/radio signals (Ethernet, Wi-Fi, Fiber).  
+  - Protocol headers differ by layer (Ethernet header, IP header, TCP/UDP header, application headers).
+
+---
+
+### 🌐 Network Protocols (Stateless vs Stateful)  
+Protocols define the rules for communication between hosts. They can be **stateless** or **stateful**:
+
+- **Stateless protocols**  
+  - **Definition:** Each request is independent; the server does not retain session state between requests.  
+  - **Example:** **UDP** (User Datagram Protocol) — single datagram delivery, no connection, no guaranteed order or delivery.  
+  - **Use cases:** DNS queries, streaming, simple request/response where low latency matters.  
+  - **Implications for testing:** Easier to spoof source IPs, harder to track session behaviour; fewer handshake artefacts for IDS/forensics.
+
+- **Stateful protocols**  
+  - **Definition:** The endpoints maintain session state across multiple messages (connection-oriented).  
+  - **Example:** **TCP** (Transmission Control Protocol) — 3-way handshake, ordered delivery, retransmission, connection teardown.  
+  - **Use cases:** HTTP (over TCP), SSH, SMTP.  
+  - **Implications for testing:** Sessions provide richer fingerprinting (handshakes, sequence numbers); stateful firewalls can track and block non-stateful traffic.
+
+- **Stateful vs Stateless Firewalls / Inspection**  
+  - **Stateless firewall:** Filters packets based on simple rules (IP, port). No session tracking; faster but easier to bypass with crafted packets.  
+  - **Stateful firewall / IPS:** Tracks connection state (e.g., TCP handshake) and inspects context. More accurate detection and blocking of anomalous traffic.
+
+---
+
+### 📚 The OSI Model  
+The **OSI (Open Systems Interconnection)** model is a conceptual 7-layer framework that standardizes network functions:
+
+| # | Layer (Name)       | Primary Function                                      | Typical Protocols / Examples |
+|---|--------------------|--------------------------------------------------------|-------------------------------|
+| 7 | **Application**    | Network services to applications / end-users          | HTTP, FTP, DNS, SMTP, SSH     |
+| 6 | **Presentation**   | Data translation, encryption, compression             | SSL/TLS, MIME, JPEG           |
+| 5 | **Session**        | Session/dialog management, synchronization            | NetBIOS, SMB, RPC             |
+| 4 | **Transport**      | End-to-end communication, reliability, flow control   | TCP (stateful), UDP (stateless) |
+| 3 | **Network**        | Logical addressing and routing                        | IP, ICMP, IPSec               |
+| 2 | **Data Link**      | Framing, MAC addressing, error detection              | Ethernet, PPP, Switches       |
+| 1 | **Physical**       | Physical transmission of raw bits                     | Cables, Fiber, Hubs, Wi-Fi    |
+
+**Notes:**  
+- The OSI model is a reference — many real-world protocols (the TCP/IP suite) map across these layers rather than matching exactly.  
+- For penetration testing, layers 3–7 are the most frequently relevant (routing, transport behavior, services, and application logic).
+
+---
+
+### 🧭 Penetration Testing Methodology (Context)  
+Networking fundamentals map directly into common pentest phases:
+
+- **Information Gathering (Passive & Active):** DNS recon, WHOIS, OSINT.  
+- **Scanning / Network Mapping:** Host discovery (ICMP, ARP), port scanning (TCP/UDP), service/OS detection.  
+- **Enumeration:** Service-specific enumeration, credential harvesting, directory/file discovery.  
+- **Exploitation & Post-Exploitation:** Use protocol/service behavior to gain access and move laterally.  
+- **Reporting:** Document network-level findings (exposed services, weak protocols, misconfigurations).
+
+---
+
+### 📚 Key Takeaways  
+- **Packets** = Header (metadata) + Payload (data). Understanding both is essential for traffic analysis.  
+- **Stateless (UDP)** vs **Stateful (TCP)** matters for how services behave, how firewalls handle traffic, and how tests should be designed.  
+- The **OSI model** helps organize where a problem or control lives (physical → application).  
+- Networking fundamentals are foundational for reconnaissance, scanning, fingerprinting, exploitation, and post-exploitation in penetration testing.  
+
+# Lesson 2: Network Layer  
+
+## 📌 What It Does
+
+The **Network Layer (Layer 3)** of the OSI model is responsible for:  
+- Logical addressing  
+- Routing and forwarding packets across different networks  
+- Determining the **optimal path** for data to travel from source to destination  
+- Abstracting the underlying physical networks to create a **cohesive internetwork**
+
+---
+
+## 🌐 Key Protocols at the Network Layer  
+- **Internet Protocol (IP)**  
+  - **IPv4** → 32-bit addressing (widely used, foundation of the Internet)  
+  - **IPv6** → 128-bit addressing (developed to overcome IPv4 limitations, exponentially larger space)  
+- **Internet Control Message Protocol (ICMP)**  
+  - Used for error reporting and diagnostics (e.g., `ping`, `traceroute`)  
+
+---
+
+## 🔑 Internet Protocol (IP)  
+- Central protocol forming the foundation of the Internet  
+- Handles **logical addressing, routing, fragmentation, and reassembly**  
+- Provides standardized way to identify and locate hosts across networks  
+
+### IP Functionality  
+- **Logical Addressing**  
+  - Unique identifiers for each device (IP addresses)  
+  - Structured by **classes, subnets, and CIDR notation**  
+- **Packet Structure**  
+  - Consists of **Header + Payload**  
+  - Header includes: source & destination IP, version, TTL, protocol type  
+
+---
+
+## 📦 IPv4 Header Fields  
+| **Field** | **Purpose** |
+|-----------|-------------|
+| **Version (4 bits)** | Indicates version of IP (value = 4 for IPv4) |
+| **Header Length (4 bits)** | Size of IPv4 header (min 20 bytes, max 60 bytes) |
+| **Type of Service (8 bits)** | QoS control, DSCP, ECN |
+| **Total Length (16 bits)** | Size of entire packet (max 65,535 bytes) |
+| **Identification (16 bits)** | Used for packet fragmentation & reassembly |
+| **Flags (3 bits)** | Control fragmentation (DF, MF bits) |
+| **TTL (8 bits)** | Max hops before discard (decrements at each router) |
+| **Protocol (8 bits)** | Identifies higher-layer protocol (TCP=6, UDP=17, ICMP=1) |
+| **Source IP (32 bits)** | Sender’s IP address |
+| **Destination IP (32 bits)** | Receiver’s IP address |
+
+---
+
+## 🏷️ Reserved IPv4 Address Ranges  
+- **0.0.0.0 – 0.255.255.255** → "This" network  
+- **127.0.0.0 – 127.255.255.255** → Loopback (local host)  
+- **192.168.0.0 – 192.168.255.255** → Private networks  
+- Full details → [RFC 5735](https://www.rfc-editor.org/rfc/rfc5735)  
+
+---
+
+## 📡 Additional IP Functionality  
+- **Fragmentation & Reassembly**  
+  - Splits large packets into smaller fragments (MTU handling)  
+  - Receiving host reassembles original packet  
+- **Addressing Types**  
+  - **Unicast** → One-to-one communication  
+  - **Broadcast** → One-to-all within subnet  
+  - **Multicast** → One-to-many (selected group of devices)  
+- **Subnetting**  
+  - Divides a network into smaller sub-networks  
+  - Enhances **efficiency** and **security**  
+
+---
+
+## ⚡ Related Protocols at Network Layer  
+- **ICMP** → Diagnostics (`ping`, `traceroute`)  
+- **DHCP** → Dynamically assigns IP addresses  
+
+---
+
+## 🧪 Wireshark Essentials (Network Layer)
+
+### 🔎 Display Filters
+- Show all IP traffic:
+    ip
+- Filter by a specific host:
+    ip.addr == 192.168.1.10
+- Show only ICMP (ping traffic):
+    icmp
+- Show only DHCP traffic:
+    bootp
+- Find fragmented packets:
+    ip.flags.mf == 1
+
+### 🎯 Capture Filters (set before recording)
+- Capture only traffic to/from a specific host:
+    host 8.8.8.8
+- Capture only ICMP (ping):
+    icmp
+- Capture only traffic on port 80 (HTTP):
+    port 80
+
+---
+
+## 📚 Quick Review Questions  
+1. What is the main responsibility of the **Network Layer (Layer 3)?**  
+2. Difference between **IPv4** and **IPv6**?  
+3. What is the purpose of the **TTL field** in the IPv4 header?  
+4. Name the three **types of IP addressing**.  
+5. Which protocol is used for **error reporting and diagnostics** at Layer 3?  
+
+
+## Lesson 3: Transport Layer
+
+## 📌 What It Does
+
+- Ensures **end-to-end communication** between two devices on a network  
+- Provides **reliable and ordered delivery** of data  
+- Handles **error detection, flow control, and segmentation** of data 
+
+---
+
+### 🔑 Key Responsibilities
+- Provides **end-to-end communication** between devices  
+- Ensures **reliable and ordered delivery** of data  
+- Handles **error detection, flow control, and retransmission**  
+- Segments large messages into smaller chunks for transmission  
+
+---
+
+### 🚦 Transport Layer Protocols
+- **TCP (Transmission Control Protocol)** → Connection-oriented, reliable, ensures ordered delivery  
+- **UDP (User Datagram Protocol)** → Connectionless, faster, no guarantee of reliability or order  
+
+---
+
+### ⚙️ TCP (Transmission Control Protocol)
+- **Connection-Oriented:** Establishes a connection before data transfer  
+- **Reliability:** Uses ACKs and retransmission to guarantee delivery  
+- **Ordered Data Transfer:** Ensures packets arrive in correct order  
+
+---
+
+### 🚩 TCP Control Flags
+Flags used to manage connections:
+
+- **SYN** → Synchronize (start a connection)  
+- **ACK** → Acknowledge receipt of data  
+- **FIN** → Terminate a connection  
+
+**Connection Lifecycle:**  
+- Establishing a Connection → SYN, SYN-ACK, ACK  
+- Data Transfer → Packets sent with sequence numbers and ACKs  
+- Termination → FIN, ACK exchange  
+
+---
+
+### 🤝 TCP 3-Way Handshake
+Process to establish a connection:  
+1. **SYN** → Client requests a connection  
+2. **SYN-ACK** → Server acknowledges and responds  
+3. **ACK** → Client confirms and connection established  
+
+After handshake, data transmission begins.
+
+---
+
+### 🔢 TCP Port Ranges
+- **Well-Known Ports (0–1023):** Standardized services (e.g., 80 HTTP, 443 HTTPS, 22 SSH, 25 SMTP)  
+- **Registered Ports (1024–49151):** Assigned to software/apps (e.g., 3389 RDP, 3306 MySQL, 8080 HTTP-alt, 27017 MongoDB)  
+- **Dynamic/Private Ports (49152–65535):** Temporary, used for client connections  
+
+Maximum port number: **65,535**
+
+---
+
+### ⚡ UDP (User Datagram Protocol)
+- **Connectionless:** No handshake, each packet independent  
+- **Unreliable:** No guarantees of delivery or retransmission  
+- **Stateless:** Does not maintain session info  
+- **Fast:** Used in real-time apps (VoIP, gaming, streaming)  
+
+---
+
+### 📊 TCP vs UDP
+
+| Feature       | UDP                        | TCP                               |
+|---------------|----------------------------|-----------------------------------|
+| **Connection** | Connectionless              | 3-Way Handshake (connection-oriented) |
+| **Reliability** | Unreliable, no guarantees   | Reliable, retransmission + ordering |
+| **Header Size** | Small, low overhead         | Larger header size                |
+| **Applications** | VoIP, gaming, streaming    | HTTP, HTTPS, FTP, SMTP, Email     |
+
+---
+
+### 🔍 Useful Tools at Transport Layer
+- **netstat -antp** → Show active connections, ports, and processes  
+- **FTP / SFTP** → File transfers (unencrypted vs encrypted)  
+- **SMB** → File sharing over networks  
+- **Encapsulation:** Ensures transport segments are wrapped inside IP packets  
+
+---
+
+### 📚 Key Takeaways  
+
+- TCP = Reliable, ordered, connection-oriented  
+- UDP = Fast, lightweight, connectionless, stateless  
+- Port numbers define services and help attackers/defenders identify traffic  
+- Tools like `netstat`, FTP/SFTP, and SMB are crucial for practical reconnaissance  
+
+
+# eJPT Study Guide 
+
+## Host Discovery
+
+## Lesson 1: Network Mapping  
+
+### 📌 What is Network Mapping?  
+- In penetration testing, **network mapping** is the process of discovering and identifying devices, hosts, and infrastructure within a target network.  
+- Pentesters use network mapping as a crucial step to:  
+  - Gather information about the network’s layout  
+  - Understand its architecture  
+  - Identify potential entry points for further exploitation  
+
+---
+
+### 🎯 Why Map a Network?  
+- Provides a clear understanding of how many systems exist and their functional role.  
+- Helps identify active hosts and their corresponding IP addresses.  
+- Supports enumeration by showing which services and operating systems are running.  
+
+---
+
+### 🛠️ Objectives of Network Mapping  
+- **Discovery of Live Hosts** → Identify active devices and hosts on the network.  
+- **Open Ports & Services** → Determine which ports are open and what services run on them.  
+- **Network Topology Mapping** → Create diagrams of routers, switches, firewalls, and other infrastructure.  
+
+---
+
+### 🔎 Nmap (Network Mapper)  
+- **Nmap** is an open-source network scanning tool used for:  
+  - Discovering hosts and services  
+  - Finding open ports  
+  - Identifying potential vulnerabilities  
+- It’s widely used by pentesters, sysadmins, and security researchers.  
+
+#### ⚙️ Nmap Functionality  
+- **Host Discovery** → ICMP echo requests, ARP requests, TCP/UDP probes  
+- **Port Scanning** → Identifies open ports on hosts  
+- **Service Version Detection** → Determines software versions running on open ports  
+- **OS Fingerprinting** → Attempts to identify operating systems based on scanning characteristics  
+
+---
+
+### 📚 Key Takeaways  
+- Network mapping = the **bridge between passive and active recon**.  
+- Essential for identifying live hosts, services, and the overall network structure.  
+- **Nmap** is the go-to tool for network mapping due to its versatility and power.  
+
+
+## Lesson 2: Host Discovery Techniques  
+
+In penetration testing, **host discovery** is a crucial phase to identify live hosts on a network before deeper exploration and vulnerability assessment.  
+
+The choice of discovery technique depends on factors such as:  
+- Network characteristics  
+- Stealth requirements  
+- Security controls in place  
+- Goals of the penetration test  
+
+---
+
+### 🔑 Key Techniques  
+
+- **ICMP Ping (Ping Sweeps)**  
+  - Sends ICMP Echo Requests to a range of IPs.  
+  - ✅ Quick, widely supported method.  
+  - ❌ Firewalls/hosts may block ICMP traffic.  
+
+- **ARP Scanning**  
+  - Uses Address Resolution Protocol (ARP) to discover hosts in the same broadcast domain.  
+  - ✅ Highly effective in local networks.  
+
+- **TCP SYN Ping (Half-Open Scan)**  
+  - Sends TCP SYN packets (commonly to port 80).  
+  - If alive, host replies with **SYN-ACK**.  
+  - ✅ Stealthier than ICMP.  
+  - ❌ Some hosts may drop SYN packets.  
+
+- **UDP Ping**  
+  - Sends UDP packets to specific ports to detect active hosts.  
+  - Useful when ICMP/TCP probes are blocked.  
+
+- **TCP ACK Ping**  
+  - Sends TCP ACK packets.  
+  - A **TCP RST** response indicates host is alive.  
+  - ✅ Works when SYN might be filtered.  
+
+- **SYN-ACK Ping**  
+  - Sends SYN-ACK packets.  
+  - A **TCP RST** response confirms host is active.  
+
+---
+
+### ⚖️ Pros & Cons of Key Methods  
+
+- **ICMP Ping**  
+  - ✅ Fast and simple  
+  - ❌ Easily blocked, detectable  
+
+- **TCP SYN Ping**  
+  - ✅ Stealthier, may bypass firewalls allowing outbound connections  
+  - ❌ Some hosts ignore SYN probes  
+
+---
+
+### 📚 Key Takeaways  
+- **No single “best” technique** → effectiveness depends on network defenses and testing goals.  
+- ICMP, TCP, and UDP methods all have strengths depending on the scenario.  
+- Stealthier techniques (e.g., SYN, ACK pings) are often used when ICMP is blocked.  
+
