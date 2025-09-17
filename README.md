@@ -1338,3 +1338,8 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 - `fping` = scalable ICMP sweeps; `ping` = single-host checks.  
 - `nmap` host-discovery flags (`-PE`, `-PS`, `-PA`, `-PU`, `-PR`) let you adapt to filtering.  
 - When in doubt, **combine methods** to reduce false negatives.
+
+# eJPT Study Guide 
+
+## Port Scanning
+
