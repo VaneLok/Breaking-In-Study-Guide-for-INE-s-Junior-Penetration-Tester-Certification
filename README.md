@@ -1254,3 +1254,87 @@ The choice of discovery technique depends on factors such as:
 - ICMP, TCP, and UDP methods all have strengths depending on the scenario.  
 - Stealthier techniques (e.g., SYN, ACK pings) are often used when ICMP is blocked.  
 
+# Lesson 3 — Ping Sweeps 
+
+## 📌 Quick Definition
+Ping sweeps = **ICMP Echo Requests** sent across an IP range to identify live hosts.  
+- **Echo Request** → Type **8**, Code **0**  
+- **Echo Reply** → Type **0**, Code **0**
+
+---
+
+## ⚙ How Ping Sweeps Work (concise)
+1. Send ICMP Echo Requests to a list/range of IPs.  
+2. Alive hosts reply with ICMP Echo Replies.  
+3. Record responding IPs as “up”; use other methods for non-responders.
+
+---
+
+## 🛠 Tools & Usage
+
+### `ping` (single-host)
+```bash
+ping example.com
+```
+
+### `fping` (multi-host / subnet)
+```bash
+# Sweep a CIDR and show alive hosts
+fping -a -g 10.10.23.0/24
+
+# Read targets from a file and show alive hosts
+fping -a -f targets.txt
+
+# Set count (retries) and timeout (ms)
+fping -c 3 -t 500 -g 192.168.1.0/24
+```
+
+**Common `fping` flags**
+- `-a` → show alive hosts only  
+- `-g` → CIDR/IP range sweep  
+- `-f <file>` → read targets from file  
+- `-c <n>` → number of pings per host  
+- `-t <ms>` → timeout per ping (ms)  
+- `-r <n>` → retries  
+- `-b <bytes>` → payload size
+
+---
+
+## 🔁 Nmap Host Discovery Alternatives
+
+| Option | Probe Type | Example | Use Case |
+|--------|------------|---------|----------|
+| `-PE`  | ICMP Echo Request | `nmap -sn -PE 10.0.0.0/24` | Standard ping |
+| `-PP`  | ICMP Timestamp | `nmap -sn -PP 10.0.0.0/24` | Alternate ICMP probe |
+| `-PM`  | ICMP Netmask | `nmap -sn -PM 10.0.0.0/24` | Rare cases |
+| `-PS`  | TCP SYN Ping | `nmap -sn -PS80,443 10.0.0.0/24` | When ICMP blocked |
+| `-PA`  | TCP ACK Ping | `nmap -sn -PA80 10.0.0.0/24` | SYN filtered |
+| `-PU`  | UDP Ping | `nmap -sn -PU53 10.0.0.0/24` | UDP-based discovery |
+| `-PR`  | ARP Scan | `nmap -sn -PR 192.168.1.0/24` | **Best for LANs** |
+
+> Tip: ARP is the most reliable for local networks; TCP/UDP probes are useful when ICMP is filtered.
+
+---
+
+## ✅ When to Use Which Method
+- **Use `fping`** for fast bulk ICMP sweeps on permissive networks (LANs, labs).  
+- **Use `nmap -sn -PE`** for a standard ICMP host discovery scan.  
+- **Switch to TCP/UDP probes (`-PS`, `-PA`, `-PU`)** when ICMP is filtered.  
+- **Use ARP (`-PR`)** for local-subnet discovery — most reliable on LANs.  
+- **Combine methods** (e.g., ARP + TCP SYN + UDP probe) for the most complete discovery.
+
+---
+
+## ⚖️ Drawbacks & Contingencies
+- ICMP often filtered → false negatives possible.  
+- Firewalls/IDS detect sweeps — be mindful of noise.  
+- ARP scans don’t route (local-only).  
+- Always follow rules of engagement and get explicit authorization.
+
+---
+
+## 📚 Key Takeaways
+- Memorize ICMP codes: Request = **8**, Reply = **0**.  
+- `fping` = scalable ICMP sweeps; `ping` = single-host checks.  
+- `nmap` host-discovery flags (`-PE`, `-PS`, `-PA`, `-PU`, `-PR`) let you adapt to filtering.  
+- When in doubt, **combine methods** to reduce false negatives.
