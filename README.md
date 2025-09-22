@@ -1343,3 +1343,126 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ## Port Scanning
 
+> Compact reference for labs / quick recall. Use only with authorization.
+
+## Host discovery
+- `-sn`      → ping scan (no port scan).  
+- `-Pn`      → skip discovery; treat host as up (use when ICMP blocked).  
+- `-PE`      → ICMP echo request.  
+- `-PS`      → TCP SYN probe (use with ports, e.g. `-PS80,443`).  
+- `-PA`      → TCP ACK probe.  
+- `-PU`      → UDP probe (specify ports).  
+- `-PR`      → ARP scan (best & most reliable on local LAN).
+
+**Example:**  
+`nmap -sn -PS80,443 10.0.0.0/24`
+
+---
+
+## Scan types (transport/stealth)
+- `-sS`      → TCP SYN (stealth, fast). (needs root for raw sockets)  
+- `-sT`      → TCP connect (no raw sockets; noisier).  
+- `-sU`      → UDP scan (slow, often requires tuning).  
+- `-sA`      → ACK scan (useful for firewall rule discovery).  
+- `-sN/-sF/-sX` → Null/FIN/Xmas scans (advanced/evade in some cases).
+
+**Example:**  
+`sudo nmap -sS -p1-1024 target.com`
+
+---
+
+## Ports selection
+- `-p-`      → scan all TCP ports (1–65535).  
+- `-p 22,80,443` → scan specific ports.  
+- `--top-ports N` → scan the top N common ports.  
+- `-F`      → fast (fewer ports).
+
+**Example:**  
+`nmap -p- -T4 target.com`
+
+---
+
+## Service & version detection
+- `-sV`                 → service/version detection.  
+- `--version-intensity <0-9>` → adjust thoroughness (higher = more probes).
+
+**Example:**  
+`nmap -sV --version-intensity 8 -p 22,80 target.com`
+
+---
+
+## OS detection & fingerprinting
+- `-O`                  → OS detection.  
+- `--osscan-guess`      → best-effort guesses if low confidence.
+
+**Example:**  
+`sudo nmap -O --osscan-guess target.com`
+
+---
+
+## Nmap Scripting Engine (NSE)
+- `-sC`                 → run default script set (safe default).  
+- `--script <name|category>` → run specific scripts or categories (e.g., `vuln`, `http-*`).
+
+**Example:**  
+`sudo nmap -sV --script vuln target.com`
+
+---
+
+## Timing / performance / stealth
+- `-T0`..`-T5`          → timing templates (0 paranoid → 5 insane).  
+  - `-T3` default, `-T4` faster (labs), `-T1/-T0` stealthy.  
+- `--min-rate` / `--max-rate` → control packet rate.
+
+**Example:**  
+`nmap -T4 -sS target.com`
+
+---
+
+## Output options
+- `-oN file` → normal output.  
+- `-oG file` → grepable (legacy).  
+- `-oX file` → XML.  
+- `-oA basename` → save all three.
+
+**Example:**  
+`nmap -oA scans/target1 -sV target.com`
+
+---
+
+## Useful misc flags
+- `-v` / `-vv`           → verbosity.  
+- `-d` / `-dd`           → debug.  
+- `-n`                  → no DNS resolution (faster).  
+- `-R`                  → force DNS resolution.  
+- `-6`                  → IPv6 scan.
+
+---
+
+## Privilege & risk notes (short)
+- `-sS`, `-sU` raw socket scans usually **require root** (`sudo`).  
+- `-Pn` wastes time if host is down — use only when necessary.  
+- Aggressive scans (`-T4/-T5`, `--script vuln`, huge `--script` sets) are **noisy** and likely to trigger IDS/IPS.  
+- **Always** have written authorization; save outputs for reporting.
+
+---
+
+## Practical one-line combos (copy-ready)
+- **Full-port + version + OS, assume host up:**  
+  `sudo nmap -Pn -p- -sS -sV --version-intensity 8 -O --osscan-guess -T4 target.com`
+
+- **Fast service scan (top ports):**  
+  `sudo nmap -T4 --top-ports 200 -sV target.com -oN quick.txt`
+
+- **Stealthy discovery & probe (slow):**  
+  `sudo nmap -sn -PS22,80 -T1 10.0.0.0/24`
+
+- **Local LAN discovery + quick service check:**  
+  `sudo nmap -sn -PR 192.168.1.0/24 && sudo nmap -sV -p22,80 192.168.1.10`
+
+---
+
+## Quick memory tips
+- **Discovery first:** `-sn` / `-PR` → then ports `-p-` → services `-sV` → NSE `--script` → save outputs `-oA`.  
+- **Stealth vs speed:** choose `-T` and scan type accordingly.
+
