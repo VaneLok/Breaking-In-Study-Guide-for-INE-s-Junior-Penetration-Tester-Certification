@@ -1345,7 +1345,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 > Compact reference for labs / quick recall. Use only with authorization.
 
-## Host discovery
+## 🔍 Host discovery
 - `-sn`      → ping scan (no port scan).  
 - `-Pn`      → skip discovery; treat host as up (use when ICMP blocked).  
 - `-PE`      → ICMP echo request.  
@@ -1359,7 +1359,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Scan types (transport/stealth)
+## ⚡ Scan types (transport/stealth)
 - `-sS`      → TCP SYN (stealth, fast). (needs root for raw sockets)  
 - `-sT`      → TCP connect (no raw sockets; noisier).  
 - `-sU`      → UDP scan (slow, often requires tuning).  
@@ -1371,7 +1371,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Ports selection
+## 🎯 Ports selection
 - `-p-`      → scan all TCP ports (1–65535).  
 - `-p 22,80,443` → scan specific ports.  
 - `--top-ports N` → scan the top N common ports.  
@@ -1382,7 +1382,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Service & version detection
+## 🧩 Service & version detection
 - `-sV`                 → service/version detection.  
 - `--version-intensity <0-9>` → adjust thoroughness (higher = more probes).
 
@@ -1391,7 +1391,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## OS detection & fingerprinting
+## 🛠️ OS detection & fingerprinting
 - `-O`                  → OS detection.  
 - `--osscan-guess`      → best-effort guesses if low confidence.
 
@@ -1400,7 +1400,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Nmap Scripting Engine (NSE)
+## 🧠 Nmap Scripting Engine (NSE)
 - `-sC`                 → run default script set (safe default).  
 - `--script <name|category>` → run specific scripts or categories (e.g., `vuln`, `http-*`).
 
@@ -1409,7 +1409,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Timing / performance / stealth
+## ⏱️ Timing / performance / stealth
 - `-T0`..`-T5`          → timing templates (0 paranoid → 5 insane).  
   - `-T3` default, `-T4` faster (labs), `-T1/-T0` stealthy.  
 - `--min-rate` / `--max-rate` → control packet rate.
@@ -1419,7 +1419,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Output options
+## 💾 Output options
 - `-oN file` → normal output.  
 - `-oG file` → grepable (legacy).  
 - `-oX file` → XML.  
@@ -1430,7 +1430,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Useful misc flags
+## 🔧 Useful misc flags
 - `-v` / `-vv`           → verbosity.  
 - `-d` / `-dd`           → debug.  
 - `-n`                  → no DNS resolution (faster).  
@@ -1439,7 +1439,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Privilege & risk notes (short)
+## ⚠️ Privilege & risk notes (short)
 - `-sS`, `-sU` raw socket scans usually **require root** (`sudo`).  
 - `-Pn` wastes time if host is down — use only when necessary.  
 - Aggressive scans (`-T4/-T5`, `--script vuln`, huge `--script` sets) are **noisy** and likely to trigger IDS/IPS.  
@@ -1447,7 +1447,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Practical one-line combos (copy-ready)
+## 💡 Practical one-line combos (copy-ready)
 - **Full-port + version + OS, assume host up:**  
   `sudo nmap -Pn -p- -sS -sV --version-intensity 8 -O --osscan-guess -T4 target.com`
 
@@ -1462,7 +1462,7 @@ fping -c 3 -t 500 -g 192.168.1.0/24
 
 ---
 
-## Quick memory tips
+## 📝 Quick memory tips
 - **Discovery first:** `-sn` / `-PR` → then ports `-p-` → services `-sV` → NSE `--script` → save outputs `-oA`.  
 - **Stealth vs speed:** choose `-T` and scan type accordingly.
 
